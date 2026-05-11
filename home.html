@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Actividades - Movilnet</title>
+    <!-- Vinculación del CSS -->
+    <link rel="stylesheet" href="{% static 'ventas/css/styles.css' %}">
+</head>
+<body class="fondo-movilnet">
+
+    <header class="navbar">
+        <img src="https://www.movilnet.com.ve/sitio/img/movilnet_logo.png" alt="Movilnet" class="logo">
+        <div class="usuario-info">
+            <span>Agente: {{ user.username|default:"Carlos R." }}</span>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <div class="encabezado-seccion">
+            <h2>Panel de Actividades del Agente</h2>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <small>Tareas Pendientes:</small>
+                    <strong id="contador-tareas">{{ tareas.count|default:"0" }}</strong>
+                </div>
+                <div class="stat-card">
+                    <small>Efectividad:</small>
+                    <strong>92%</strong>
+                </div>
+            <td><span class="badge {{ tarea.prioridad }}">{{ tarea.prioridad|title }}</span></td>
+        </div>
+
+        <div class="tabla-vidrio">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prioridad</th>
+                        <th>Descripción de Actividad</th>
+                        <th>Fecha/Hora Asignada</th>
+                        <th>Deadline</th>
+                        <th>Estatus</th>
+                        <th>Estado Actual</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                  <tbody>
+                        {% for tarea in tareas %}
+                        <tr data-id="{{ tarea.id }}">
+                    <td>
+                    <span class="badge {{ tarea.prioridad|lower }}">
+                {{ tarea.prioridad|title }}
+            </span>
+        </td>
+        <td>{{ tarea.descripcion }}</td>
+        <td>{{ tarea.fecha_asignada|date:"d/m/Y H:i" }}</td>
+        <td>{{ tarea.deadline|date:"d/m/Y" }}</td>
+        
+        <td class="estatus-texto {% if tarea.completada %}actualizado{% endif %}">
+            {% if tarea.completada %}Completada{% else %}Pendiente{% endif %}
+                 </td>
+        
+                    <td class="estado-dinamico {% if tarea.completada %}revision{% endif %}">
+                 {% if tarea.completada %}En revisión{% else %}Pendiente{% endif %}
+                        </td>
+
+                            <td>
+                    {% if not tarea.completada %}
+                        <form action="{% url 'finalizar' tarea.id %}" method="POST" class="form-finalizar">
+                    {% csrf_token %}
+                            <button type="submit" class="btn-finalizar">Finalizar Tarea</button>
+                        </form>
+                            {% else %}
+                            <button class="btn-finalizar completado" disabled>Finalizada</button>
+                        {% endif %}
+                            </td>
+                         </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" style="text-align:center;">No hay tareas cargadas en la base de datos.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Vinculación del JavaScript al final para mejor carga -->
+    <script src="{% static 'ventas/js/script.js' %}"></script>
+</body>
+</html>
